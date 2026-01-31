@@ -6,10 +6,17 @@ export const data = new SlashCommandBuilder()
   .setDescription('Interactive AI-powered server builder');
 
 export async function execute(interaction) {
-  if (interaction.user.id !== interaction.guild.ownerId)
-    return interaction.reply({ content: '❌ Only server owner can run this.', ephemeral:true });
+  if (interaction.user.id !== interaction.guild.ownerId) {
+    return interaction.reply({ content: '❌ Only server owner can run this.', ephemeral: true });
+  }
 
+  // Let Discord know we're working on it
+  await interaction.deferReply({ ephemeral: true });
+
+  // Create the dashboard
   const dashboard = createDashboard();
-  await interaction.reply({ embeds:[createPreviewEmbed({})], components: dashboard.components, ephemeral:true });
+  await interaction.editReply({
+    embeds: [createPreviewEmbed({})],
+    components: dashboard.components
+  });
 }
-
