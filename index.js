@@ -1,23 +1,33 @@
 // ==================
 // 1️⃣ Environment & Express server
 // ==================
-import 'dotenv/config'; // must be first
+import 'dotenv/config'; // MUST be first
 import express from 'express';
-import { Client, GatewayIntentBits, REST, Routes, Collection, InteractionType, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } from 'discord.js';
+import {
+  Client,
+  GatewayIntentBits,
+  REST,
+  Routes,
+  Collection,
+  InteractionType,
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+  ActionRowBuilder
+} from 'discord.js';
 import fs from 'fs';
-import path from 'path';
 import { generateRoleName, generateRoleColor } from './utils/roleGenerator.js';
 import { generateServerJSON } from './utils/chatGPT.js';
 import { createPreviewEmbed } from './components/buildDashboard.js';
 
-// Dummy Express server so Render free plan is happy
+// Dummy Express server for Render free plan
 const app = express();
 const PORT = process.env.PORT || 10000;
 app.get('/', (req, res) => res.send('AuraBot running!'));
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
 
 // ==================
-// 2️⃣ Debug environment variables
+// 2️⃣ Debug Environment Variables
 // ==================
 console.log('TOKEN:', process.env.TOKEN ? '[REDACTED]' : '❌ NOT SET');
 console.log('CLIENT_ID:', process.env.CLIENT_ID ? '[REDACTED]' : '❌ NOT SET');
@@ -40,14 +50,18 @@ for (const file of commandFiles) {
 }
 
 // ==================
-// 5️⃣ Deploy commands
+// 5️⃣ Deploy slash commands
 // ==================
-const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
-await rest.put(
-  Routes.applicationCommands(process.env.CLIENT_ID),
-  { body: Array.from(client.commands.values()).map(c => c.data.toJSON()) }
-);
-console.log('✅ Slash commands deployed');
+try {
+  const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+  await rest.put(
+    Routes.applicationCommands(process.env.CLIENT_ID),
+    { body: Array.from(client.commands.values()).map(c => c.data.toJSON()) }
+  );
+  console.log('✅ Slash commands deployed');
+} catch (err) {
+  console.error('❌ Failed to deploy commands:', err);
+}
 
 // ==================
 // 6️⃣ Discord Ready
@@ -174,13 +188,16 @@ client.on('interactionCreate', async interaction => {
       tempSelections[userId].extraPrompt = interaction.fields.getTextInputValue('extraPromptInput');
       await interaction.reply({ content: '📝 Extra prompt saved!', ephemeral: true });
     }
+
   } catch (err) {
     console.error('Interaction error:', err);
   }
 });
 
 // ==================
-// 8️⃣ Login
+// 8️⃣ Login to Discord (with debug)
 // ==================
-console.log('Logging in...');
-client.login(process.env.TOKEN);
+console.log('Attempting Discord login...');
+client.login(process.env.TOKEN)
+  .then(() => console.log('Discord login succeeded!'))
+  .catch(err => console.error('❌ Discord login failed:', err));
