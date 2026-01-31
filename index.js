@@ -1,3 +1,18 @@
+import express from 'express';
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// A simple route
+app.get('/', (req, res) => {
+  res.send('AuraBot is running!');
+});
+
+// Start listening
+app.listen(PORT, () => {
+  console.log(`Listening on port ${PORT}`);
+});
+
 import 'dotenv/config';
 import { Client, GatewayIntentBits, REST, Routes, Collection, InteractionType, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } from 'discord.js';
 import fs from 'fs';
